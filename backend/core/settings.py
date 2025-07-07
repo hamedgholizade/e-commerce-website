@@ -82,9 +82,9 @@ DATABASES = {
         
         # postgres-db-configs
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'your_database_name',
-        'USER': 'your_username',
-        'PASSWORD': 'your_password',
+        'NAME': 'e_commerce_db',
+        'USER': 'postgres',
+        'PASSWORD': '4471',
         'HOST': 'localhost',
         'PORT': '5432',
     }
