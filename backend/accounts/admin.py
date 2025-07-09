@@ -3,7 +3,6 @@ from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.utils.translation import gettext_lazy as _
 
 from base.admin import BaseAdmin
-from base.admin_filters import IsDeletedFilter
 from accounts.models import User
 
 
@@ -24,6 +23,7 @@ class UserAdmin(DjangoUserAdmin, BaseAdmin):
     list_filter = BaseAdmin.list_filter + ['role', 'is_active']
     ordering = ('-created_at',)
     
+    #  Fields to be displayed in the user detail view
     fieldsets = (
         (None, {"fields": ("phone", "role", "password")}),
         (_("Personal info"), {"fields": ("email", "first_name", "last_name")}),
@@ -41,10 +41,7 @@ class UserAdmin(DjangoUserAdmin, BaseAdmin):
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
-    fieldsets = DjangoUserAdmin.fieldsets + (
-        (None, {'fields': ('phone', 'role', 'created_at', 'updated_at')}),
-    )
-
+    
     #  Fields to be displayed in the add user form for new user
     add_fieldsets = (
         (None, {

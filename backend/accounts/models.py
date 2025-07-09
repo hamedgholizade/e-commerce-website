@@ -16,7 +16,6 @@ class UserManager(DjangoUserManager.from_queryset(BaseModelQuerySet)):
             raise ValueError('Password is required')
         if email:
             email = self.normalize_email(email)
-        extra_fields.setdefault('username', phone)
         user = self.model(phone=phone, email=email, **extra_fields)
         user.set_password(password)
         user.save()
@@ -25,6 +24,7 @@ class UserManager(DjangoUserManager.from_queryset(BaseModelQuerySet)):
     def create_superuser(self, phone, email=None, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('role', 'admin')
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
