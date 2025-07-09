@@ -8,9 +8,9 @@ class Discount(BaseModel):
     Model representing a discount that can be applied to products.
     """
     DISCOUNT_TYPE_CHOICES = [
-        ('percentage' 'Percentage'),
+        ('percentage', 'Percentage'),
         ('fixed', 'Fixed Amount'),
-        ('shipping' 'Free Shipping'),
+        ('shipping', 'Free Shipping'),
     ]
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)

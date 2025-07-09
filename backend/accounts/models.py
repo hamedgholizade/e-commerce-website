@@ -7,9 +7,30 @@ from base.models import BaseModelQuerySet, BaseModel
 
 class UserManager(DjangoUserManager.from_queryset(BaseModelQuerySet)):
     """
-    Custom UserManager that extends Django's UserManager with additional queryset methods.
+    Custom UserManager that supports 'phone' as the USERNAME_FIELD
     """
-    pass
+    def create_user(self, phone, email=None, password=None, **extra_fields):
+        if not phone:
+            raise ValueError("Phone number is required")
+        if not password:
+            raise ValueError('Password is required')
+        if email:
+            email = self.normalize_email(email)
+        user = self.model(phone=phone, email=email, **extra_fields)
+        user.set_password(password)
+        user.save()
+        return user
+
+    def create_superuser(self, phone, email=None, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self.create_user(phone=phone, email=email, password=password, **extra_fields)
 
 
 class User(AbstractUser, BaseModel):
@@ -22,18 +43,18 @@ class User(AbstractUser, BaseModel):
         ('seller', 'Seller'),
     )
     username = None
-    email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=15, unique=True, null=True, blank=True)
+    phone = models.CharField(max_length=15, unique=True)
+    email = models.EmailField(unique=True, null=True, blank=True)
     role = models.CharField(max_length=10, choices=USER_ROLE_CHOICES, default='customer')
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['phone']
-
     objects = UserManager()
+    
+    USERNAME_FIELD = 'phone'
+    REQUIRED_FIELDS = ['email']
 
     class Meta:
         verbose_name = "user"
         verbose_name_plural = "users"
 
     def __str__(self):
-        return self.email
+        return f"{self.email} ({self.phone})"
