@@ -16,6 +16,7 @@ class UserManager(DjangoUserManager.from_queryset(BaseModelQuerySet)):
             raise ValueError('Password is required')
         if email:
             email = self.normalize_email(email)
+        extra_fields.setdefault('username', phone)
         user = self.model(phone=phone, email=email, **extra_fields)
         user.set_password(password)
         user.save()
@@ -56,5 +57,9 @@ class User(AbstractUser, BaseModel):
         verbose_name = "user"
         verbose_name_plural = "users"
 
+    def save(self, *args, **kwargs):
+        self.username = self.phone
+        super().save(*args, **kwargs)
+    
     def __str__(self):
         return f"{self.email} ({self.phone})"
