@@ -58,7 +58,7 @@ class User(AbstractUser, BaseModel):
         verbose_name_plural = "users"
 
     def save(self, *args, **kwargs):
-        self.username = self.phone
+        self.is_active = not bool(self.removed_at)
         super().save(*args, **kwargs)
     
     def __str__(self):
