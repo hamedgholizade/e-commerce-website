@@ -1,10 +1,11 @@
 from django.contrib import admin
 
-from .models import Discount
+from base.admin import BaseAdmin
+from discounts.models import Discount
 
 
 @admin.register(Discount)
-class DiscountAdmin(admin.ModelAdmin):
+class DiscountAdmin(BaseAdmin):
     list_display = (
         'name',
         'code',
@@ -19,6 +20,5 @@ class DiscountAdmin(admin.ModelAdmin):
         'updated_at',
     )
     search_fields = ['name', 'code']
-    list_filter = ['type', 'is_active']
+    list_filter = BaseAdmin.list_filter + ['type', 'is_active']
     ordering = ('name',)
-    readonly_fields = ['created_at', 'updated_at']

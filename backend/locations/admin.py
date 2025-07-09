@@ -22,7 +22,7 @@ class CityAdmin(BaseAdmin):
     list_display = ['name', 'country', 'created_at', 'updated_at']
     search_fields = ('name',)
     ordering = ('name',)
-    list_filter = ('country',)
+    list_filter = BaseAdmin.list_filter + ['country__name']
 
 
 @admin.register(Address)
@@ -42,5 +42,5 @@ class AddressAdmin(BaseAdmin):
                     'updated_at']
     search_fields = ('address', 'postal_code', 'state')
     ordering = ('city__name',)
-    list_filter = ['city', 'is_default']
+    list_filter = BaseAdmin.list_filter + ['city__name', 'is_default']
     
