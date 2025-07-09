@@ -1,3 +1,10 @@
-# e-commerce-website
+# E-commerce website
 
-![ERD Diagram](backend/docs/E-CommercePlatformERD.png)
+<details>
+  <summary><strong>ERD of E-commerce project</strong></summary>
+
+  <br/>
+
+  ![ERD Diagram](backend/docs/E-CommercePlatformERD.png)
+
+</details>
