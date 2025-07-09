@@ -16,7 +16,7 @@ class Discount(BaseModel):
     description = models.TextField(blank=True, null=True)
     code = models.CharField(max_length=50, unique=True)
     type = models.CharField(
-        max_length=1,
+        max_length=10,
         choices=DISCOUNT_TYPE_CHOICES,
         default='percentage',
     )
