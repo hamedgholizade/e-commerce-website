@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
 from base.models import BaseModel
+from stores.models import Store
 
 User = get_user_model()
 
@@ -42,7 +43,13 @@ class Address(BaseModel):
         null=True,
         blank=True
     )
-    store = None  # Assuming a Store model exists
+    store = models.ForeignKey(
+        Store,
+        on_delete=models.CASCADE,
+        related_name='addresses',
+        null=True,
+        blank=True
+    )
     city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='addresses')
     address = models.CharField(max_length=255)
     postal_code = models.CharField(max_length=20)
