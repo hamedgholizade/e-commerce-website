@@ -37,18 +37,21 @@ class OrderItemAdmin(BaseAdmin):
     Admin interface for OrderItem model.
     """
     list_display = ['order__id',
-                    'store_item__product__name',
+                    'store_item__product',
+                    'store_item__product__title',
                     'quantity',
                     'price_at_purchase',
                     'created_at',
                     'updated_at'
                     ]
     search_fields = ['order__id',
-                     'store_item__product__name',
+                     'store_item__product',
                      'order__user__phone',
+                     'store_item__product__title',
                     ]
     list_filter = BaseAdmin.list_filter + [
         'order__status',
-        'store_item__product__name',
+        'store_item__product',
         'order__user__phone',
+        'store_item__product__title'
         ]
