@@ -14,13 +14,12 @@ class CategoryAdmin(BaseAdmin):
     Admin interface for Category model.
     """
     list_display = ['name',
-                    'slug',
                     'description',
                     'parent',
                     'created_at',
                     'updated_at',
                     ]
-    search_fields = ['name', 'slug']
+    search_fields = ['name', 'description']
     list_filter = BaseAdmin.list_filter + ['parent']
 
 
@@ -29,15 +28,14 @@ class ProductAdmin(BaseAdmin):
     """
     Admin interface for Product model.
     """
-    list_display = ['title',
-                    'slug',
-                    'brand',
-                    'status',
+    list_display = ['name',
+                    'stock',
+                    'rating',
                     'created_at',
                     'updated_at',
                     ]
-    search_fields = ['title', 'slug', 'brand']
-    list_filter = BaseAdmin.list_filter + ['status', 'category__name']
+    search_fields = ['name', 'description']
+    list_filter = BaseAdmin.list_filter + ['category__name']
     
     
 @admin.register(ProductImage)
@@ -45,12 +43,10 @@ class ProductImageAdmin(BaseAdmin):
     """
     Admin interface for ProductImage model.
     """
-    list_display = ['product__title',
+    list_display = ['product__name',
                     'image',
-                    'alt_text',
-                    'is_primary',
                     'created_at',
                     'updated_at',
                     ]
-    search_fields = ['product__title', 'alt_text']
-    list_filter = BaseAdmin.list_filter + ['is_primary']
+    search_fields = ('product__name',)
+    list_filter = BaseAdmin.list_filter + ['product__name']
