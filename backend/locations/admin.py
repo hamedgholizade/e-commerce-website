@@ -1,28 +1,7 @@
 from django.contrib import admin
 
 from base.admin import BaseAdmin
-from locations.models import Country, City, Address
-
-
-@admin.register(Country)
-class CountryAdmin(BaseAdmin):
-    """
-    Admin interface for managing countries.
-    """
-    list_display = ['name', 'created_at', 'updated_at']
-    search_fields = ('name',)
-    ordering = ('name',)
-
-
-@admin.register(City)
-class CityAdmin(BaseAdmin):
-    """
-    Admin interface for managing cities.
-    """
-    list_display = ['name', 'country', 'created_at', 'updated_at']
-    search_fields = ('name',)
-    ordering = ('name',)
-    list_filter = BaseAdmin.list_filter + ['country__name']
+from locations.models import Address
 
 
 @admin.register(Address)
@@ -32,15 +11,14 @@ class AddressAdmin(BaseAdmin):
     """
     list_display = ['user',
                     'store',
+                    'label',
+                    'address_line_1',
                     'city',
-                    'address',
-                    'postal_code',
                     'state',
-                    'phone',
-                    'is_default',
+                    'postal_code',
                     'created_at',
                     'updated_at']
-    search_fields = ('address', 'postal_code', 'state')
-    ordering = ('city__name',)
-    list_filter = BaseAdmin.list_filter + ['city__name', 'is_default']
+    search_fields = ('address_line_1', 'postal_code', 'state')
+    ordering = ('city',)
+    list_filter = BaseAdmin.list_filter + ['city', 'state']
     
