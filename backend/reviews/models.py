@@ -33,12 +33,12 @@ class Review(BaseModel):
         null=True,
         blank=True
     )
-    parent_review = models.ForeignKey(
+    parent = models.ForeignKey(
         'self',
         on_delete=models.CASCADE,
         related_name='replies',
-        blank=True,
-        null=True
+        null=True,
+        blank=True
     )
     comment = models.TextField()
     
