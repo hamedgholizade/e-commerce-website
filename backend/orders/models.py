@@ -13,37 +13,36 @@ class Order(BaseModel):
     """
     Model representing an order in the e-commerce system.
     """
+    ORDER_PENDING = 1
+    ORDER_PROCCESSING = 2
+    ORDER_DELIVERED = 3
+    ORDER_CANCELLED = 4
+    ORDER_FAILED = 5
+    
     ORDER_STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('completed', 'Completed'),
-        ('processing', 'Processing'),
-        ('shipped', 'Shipped'),
-        ('delivered', 'Delivered'),
-        ('cancelled', 'Cancelled'),
-        ('returned', 'Returned'),
-        ('refunded', 'Refunded'),
-        ('failed', 'Failed'),
+        (ORDER_PENDING, 'منتظر'),
+        (ORDER_PROCCESSING, 'در حال پردازش'),
+        (ORDER_DELIVERED, 'تحویل شده'),
+        (ORDER_CANCELLED, 'لغو شده'),
+        (ORDER_FAILED, 'خطا'),
     ]
-    user = models.ForeignKey(
+    customer = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='orders'
         )
     address = models.ForeignKey(
         Address, on_delete=models.CASCADE, related_name='orders'
         )
-    discount = models.ForeignKey(
-        Discount, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders'
+    status = models.IntegerField(
+        choices=ORDER_STATUS_CHOICES, default=ORDER_PENDING
         )
-    status = models.CharField(
-        max_length=20, choices=ORDER_STATUS_CHOICES, default='pending'
-        )
-    total_price = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0.00, blank=True, null=True
+    total_price = models.CharField(
+        max_length=100, blank=True, null=True
         )
     
     def __str__(self):
         return f"""
-                Order {self.id} by {self.user.phone}/
-                {self.user.first_name}.{self.user.last_name}
+                Order {self.id} by {self.customer.phone}/
+                {self.customer.first_name}.{self.customer.last_name}
                 - Status: {self.status}"""
 
 
@@ -58,10 +57,15 @@ class OrderItem(BaseModel):
         StoreItem, on_delete=models.CASCADE, related_name='order_items'
         )
     quantity = models.PositiveIntegerField(default=0)
-    price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.CharField(
+        max_length=100, blank=True, null=True
+        )
+    total_price = models.CharField(
+        max_length=100, blank=True, null=True
+        )
 
     def __str__(self):
         return f"""
                 Item {self.id} in Order 
-                {self.order.id} - {self.store_item.product.title}
+                {self.order.id} - {self.store_item.product.name}
                 x {self.quantity}"""

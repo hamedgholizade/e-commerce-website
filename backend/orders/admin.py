@@ -9,24 +9,21 @@ class OrderAdmin(BaseAdmin):
     """
     Admin interface for Order model.
     """
-    list_display = ['user__phone',
-                    'discount__name',
+    list_display = ['customer__phone',
                     'status', 
                     'total_price',
                     'created_at',
                     'updated_at'
                     ]
-    search_fields = ['user__phone',
-                     'user__first_name',
-                     'user__last_name',
-                     'user__email',
+    search_fields = ['customer__phone',
+                     'customer__first_name',
+                     'customer__last_name',
+                     'customer__email',
                     'status',
                     ]
     list_filter = BaseAdmin.list_filter + [
-        'user__phone',
-        'user__email',
-        'discount__code',
-        'discount__name',
+        'customer__phone',
+        'customer__email',
         'status'
         ]
     
@@ -38,20 +35,20 @@ class OrderItemAdmin(BaseAdmin):
     """
     list_display = ['order__id',
                     'store_item__product',
-                    'store_item__product__title',
                     'quantity',
-                    'price_at_purchase',
+                    'price',
+                    'total_price',
                     'created_at',
                     'updated_at'
                     ]
     search_fields = ['order__id',
                      'store_item__product',
-                     'order__user__phone',
-                     'store_item__product__title',
+                     'order__cutomer__phone',
+                     'store_item__product__name',
                     ]
     list_filter = BaseAdmin.list_filter + [
         'order__status',
         'store_item__product',
-        'order__user__phone',
-        'store_item__product__title'
+        'order__cutomer__phone',
+        'store_item__product__name'
         ]
