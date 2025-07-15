@@ -40,11 +40,12 @@ INSTALLED_APPS = [
     # third-party apps
     "rest_framework",
     # local apps
+    "base",
     "accounts",
-    "discounts",
     "locations",
     "products",
     "stores",
+    "orders",
 ]
 
 MIDDLEWARE = [
