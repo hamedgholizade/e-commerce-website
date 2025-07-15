@@ -13,7 +13,7 @@ class Store(BaseModel):
     """
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
-    manager = models.ForeignKey(
+    seller = models.ForeignKey(
         User, related_name='stores', on_delete=models.CASCADE
     )
 
@@ -31,9 +31,14 @@ class StoreItem(BaseModel):
     product = models.ForeignKey(
         Product, related_name='store_items', on_delete=models.CASCADE
     )
-    quantity = models.PositiveIntegerField(default=0)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    is_listed = models.BooleanField(default=True)
+    price = models.CharField(max_length=100)
+    discount_price = models.CharField(
+        max_length=100, blank=True, null=True
+    )
+    stock = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        unique_together = ('store', 'product')
 
     def __str__(self):
-        return f"{self.product.title} in {self.store.name}"
+        return f"{self.product.name} in {self.store.name}"

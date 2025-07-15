@@ -11,7 +11,7 @@ class StoreAdmin(BaseAdmin):
     """
     list_display = ['name',
                     'description',
-                    'manager__phone',
+                    'seller__phone',
                     'created_at',
                     'updated_at'
                     ]
@@ -24,16 +24,15 @@ class StoreItemAdmin(BaseAdmin):
     Admin interface for StoreItem model.
     """
     list_display = ['store__name',
-                    'product__title',
-                    'quantity',
+                    'product__name',
+                    'stock',
                     'price',
-                    'is_listed',
+                    'discount_price',
                     'created_at',
                     'updated_at'
                     ]
-    search_fields = ['store__name', 'product__title']
+    search_fields = ['store__name', 'product__name']
     list_filter = BaseAdmin.list_filter + [
-        'is_listed',
         'store__name',
-        'product__title',
+        'product__name',
         ]
