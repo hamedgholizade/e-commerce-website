@@ -16,6 +16,7 @@ class UserManager(DjangoUserManager.from_queryset(BaseModelQuerySet)):
             raise ValueError('Password is required')
         if email:
             email = self.normalize_email(email)
+        extra_fields.setdefault('username', phone)
         user = self.model(phone=phone, email=email, **extra_fields)
         user.set_password(password)
         user.save()
@@ -24,7 +25,6 @@ class UserManager(DjangoUserManager.from_queryset(BaseModelQuerySet)):
     def create_superuser(self, phone, email=None, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('role', 'admin')
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
@@ -38,28 +38,18 @@ class User(AbstractUser, BaseModel):
     """
     Custom User model that extends Django's AbstractUser.
     """
-    USER_ROLE_CHOICES = (
-        ('admin', 'Admin'),
-        ('customer', 'Customer'),
-        ('seller', 'Seller'),
-    )
-    username = None
+    
     phone = models.CharField(max_length=15, unique=True)
     email = models.EmailField(unique=True, null=True, blank=True)
-    role = models.CharField(max_length=10, choices=USER_ROLE_CHOICES, default='customer')
+    picture = models.ImageField(
+        upload_to='accounts/profile_pictures/', default='accounts/profile_pictures/default.jpg'
+    )
+    is_seller = models.BooleanField(default=False)
 
     objects = UserManager()
     
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['email']
-
-    class Meta:
-        verbose_name = "user"
-        verbose_name_plural = "users"
-
-    def save(self, *args, **kwargs):
-        self.is_active = not bool(self.removed_at)
-        super().save(*args, **kwargs)
     
     def __str__(self):
         return f"{self.email} ({self.phone})"
