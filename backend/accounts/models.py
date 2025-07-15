@@ -42,7 +42,7 @@ class User(AbstractUser, BaseModel):
     phone = models.CharField(max_length=15, unique=True)
     email = models.EmailField(unique=True, null=True, blank=True)
     picture = models.ImageField(
-        upload_to='accounts/profile_pictures/', default='accounts/profile_pictures/default.jpg'
+        upload_to='media/accounts/profile_pictures/', default='media/accounts/profile_pictures/default.jpg'
     )
     is_seller = models.BooleanField(default=False)
 
