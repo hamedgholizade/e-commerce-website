@@ -1,5 +1,5 @@
 from django.contrib import admin
-from base.admin_filters import IsDeletedFilter
+from base.admin_filters import IsActiveFilter
 
 
 class BaseAdmin(admin.ModelAdmin):
@@ -10,7 +10,7 @@ class BaseAdmin(admin.ModelAdmin):
     date_hierarchy = "updated_at"
     list_per_page = 15
     readonly_fields = ['created_at', 'updated_at']
-    list_filter = [IsDeletedFilter]
+    list_filter = [IsActiveFilter]
     
     def get_queryset(self, request):
         """
