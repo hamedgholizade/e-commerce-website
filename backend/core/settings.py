@@ -147,6 +147,6 @@ AUTH_USER_MODEL = 'accounts.User'
 
 # Custom Authentication Backend
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.PhoneEmailAuthBackkend',
+    'accounts.backends.PhoneEmailUsernameAuthBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]

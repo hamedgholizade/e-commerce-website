@@ -5,17 +5,20 @@ from django.db.models import Q
 User = get_user_model()
 
 
-class PhoneEmailAuthBackkend(ModelBackend):
+class PhoneEmailUsernameAuthBackend(ModelBackend):
     """
-    Custom authentication backend that allows users to log in using either their phone number or email address.
+    Custom authentication backend that allows users to log in
+    using either their username or phone number or email address.
     """
     def authenticate(self, request, username=None, password=None, **kwargs):
-        if username is None:
-            username = kwargs.get(User.USERNAME_FIELD)
+        if username is None or password is None:
+            return None
 
         try:
-            # Try to find the user by phone number first
-            user = User.objects.get(Q(phone=username) | Q(email=username))
+            # Try to find the user by username and phone number and email
+            user = User.objects.get(
+                Q(username=username) | Q(phone=username) | Q(email=username)
+            )
         except User.DoesNotExist:
             # If not found, return None
             return None
