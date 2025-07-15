@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 
 from base.models import BaseModel
 from locations.models import Address
-from discounts.models import Discount
 from stores.models import StoreItem
 
 User = get_user_model()
