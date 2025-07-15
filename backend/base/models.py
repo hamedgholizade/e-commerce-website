@@ -1,6 +1,4 @@
 from django.db import models
-from django.utils import timezone
-
 
 class BaseModelQuerySet(models.QuerySet):
     """
@@ -9,21 +7,21 @@ class BaseModelQuerySet(models.QuerySet):
 
     def active(self):
         """
-        Returns only the objects that are not soft deleted (removed).
+        Returns only the objects that are not soft deleted (is_active=True).
         """
-        return self.filter(removed_at__isnull=True)
+        return self.filter(is_active=True)
 
     def deleted(self):
         """
-        Returns only the objects that have been soft deleted (removed).
+        Returns only the objects that have been soft deleted (is_active=False).
         """
-        return self.filter(removed_at__isnull=False)
+        return self.filter(is_active=False)
 
     def soft_delete(self):
         """
-        Marks the object as removed by setting the removed_at field to the current time.
+        Marks the object as removed by setting the is_active field to False.
         """
-        self.update(removed_at=timezone.now())
+        self.update(is_active=False)
     
     def hard_delete(self):
         """
@@ -33,9 +31,9 @@ class BaseModelQuerySet(models.QuerySet):
     
     def restore(self):
         """
-        Restores soft deleted objects by setting removed_at to None.
+        Restores soft deleted objects by setting is_active to True.
         """
-        return self.update(removed_at=None)
+        return self.update(is_active=True)
 
 
 class BaseModel(models.Model):
@@ -45,7 +43,7 @@ class BaseModel(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    removed_at = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
     
     objects = BaseModelQuerySet.as_manager()
     all_objects = models.Manager()  # For accessing all objects,
@@ -56,11 +54,11 @@ class BaseModel(models.Model):
 
     def soft_delete(self):
         """
-        Marks the object as removed by setting the removed_at field to the current time.
+        Marks the object as removed by setting the is_active field to False.
         """
         if self.removed_at is None:
-            self.removed_at = timezone.now()
-            self.save(update_fields=['removed_at'])
+            self.is_active = False
+            self.save(update_fields=['is_active'])
             return True
         return False
         
@@ -72,18 +70,11 @@ class BaseModel(models.Model):
         
     def restore(self):
         """
-        Restores the object by setting removed_at to None.
+        Restores the object by setting is_active to True.
         """
         if self.removed_at is not None:
-            self.removed_at = None
-            self.save(update_fields=['removed_at'])
+            self.is_active = True
+            self.save(update_fields=['is_active'])
             return True
         return False
-    
-    @property
-    def is_deleted(self):
-        """
-        Returns True if the object is soft deleted, otherwise False.
-        """
-        return self.removed_at is not None
     
