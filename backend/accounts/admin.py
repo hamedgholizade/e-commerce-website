@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from base.admin import BaseAdmin
 from accounts.models import User
+from accounts.forms import CustomUserCreationForm
 
 
 @admin.register(User)
@@ -11,6 +12,9 @@ class UserAdmin(DjangoUserAdmin, BaseAdmin):
     """
     Admin interface for managing users.
     """
+    add_form = CustomUserCreationForm
+    model = User
+    
     list_display = [
         'phone',
         'email',
@@ -31,7 +35,7 @@ class UserAdmin(DjangoUserAdmin, BaseAdmin):
     #  Fields to be displayed in the user detail view
     fieldsets = (
         (None, {"fields": ("phone", "is_seller", "password")}),
-        (_("Personal info"), {"fields": ("email", "first_name", "last_name")}),
+        (_("Personal info"), {"fields": ("email", "picture", "first_name", "last_name")}),
         (
             _("Permissions"),
             {
@@ -53,6 +57,7 @@ class UserAdmin(DjangoUserAdmin, BaseAdmin):
             'classes': ('wide',),
             'fields': ('phone',
                        'email',
+                       "picture",
                        'first_name',
                        'last_name',
                        'is_seller',
