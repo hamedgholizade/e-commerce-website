@@ -10,7 +10,7 @@ class Category(BaseModel):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(
-        upload_to='media/categories/', default='media/categories/default.jpg'
+        upload_to='categories/', default='categories/default.jpg'
     )
     parent = models.ForeignKey(
         'self', related_name='subcategories', on_delete=models.CASCADE, blank=True, null=True
