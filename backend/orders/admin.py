@@ -43,12 +43,12 @@ class OrderItemAdmin(BaseAdmin):
                     ]
     search_fields = ['order__id',
                      'store_item__product',
-                     'order__cutomer__phone',
+                     'order__customer__phone',
                      'store_item__product__name',
                     ]
     list_filter = BaseAdmin.list_filter + [
         'order__status',
         'store_item__product',
-        'order__cutomer__phone',
+        'order__customer__phone',
         'store_item__product__name'
         ]
