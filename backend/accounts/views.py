@@ -1,3 +1,27 @@
-from django.shortcuts import render
+from django.contrib.auth import get_user_model
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework_simplejwt.tokens import RefreshToken
 
-# Create your views here.
+from accounts.serializers import RegisterSerializer, LoginSerializer
+
+User = get_user_model()
+
+    
+class RegisterAPIView(generics.CreateAPIView):
+    queryset = User.objects.active()
+    serializer_class = RegisterSerializer
+    
+    def create(self, request, *args, **kwargs):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'message': 'User registered successfully',
+            'user': serializer.data,
+            'access': str(refresh.access_token),
+            'refresh': str(refresh)
+        }, status=201)
+    
