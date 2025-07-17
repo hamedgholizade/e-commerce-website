@@ -17,7 +17,7 @@ class RegisterAPIView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     
     def create(self, request, *args, **kwargs):
-        serializer = RegisterSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         refresh = RefreshToken.for_user(user)
@@ -34,7 +34,7 @@ class LoginAPIView(generics.CreateAPIView):
     serializer_class = LoginSerializer
     
     def create(self, request, *args, **kwargs):
-        serializer = LoginSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         refresh = RefreshToken.for_user(user)
