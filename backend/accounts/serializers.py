@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
@@ -28,3 +29,14 @@ class LoginSerializer(serializers.Serializer):
     phone_or_email = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
+    def validate(self, attrs):
+        user = authenticate(
+            username=attrs['phone_or_email'],
+            password=attrs['password']
+        )
+        if not user:
+            raise serializers.ValidationError(
+                "No active account found with the given credentials"
+                )
+        attrs['user'] = user
+        return attrs
