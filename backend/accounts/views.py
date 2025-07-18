@@ -2,20 +2,11 @@ from django.contrib.auth import get_user_model
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework_simplejwt.tokens import (
-    RefreshToken,
-    UntypedToken
-)
-from rest_framework_simplejwt.exceptions import (
-    TokenError,
-    InvalidToken
-)
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.serializers import (
     RegisterSerializer,
-    LoginSerializer,
-    LogoutSerializer,
-    VerifyTokenSerializer
+    LoginSerializer
 )
 
 User = get_user_model()
@@ -52,41 +43,3 @@ class LoginAPIView(generics.CreateAPIView):
             'access': str(refresh.access_token),
             'refresh': str(refresh)
         }, status=200)
-        
-
-class LogoutAPIView(generics.CreateAPIView):
-    serializer_class = LogoutSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    
-    def create(self, request, *args, **kwargs):
-        try:
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            refresh_token = serializer.validated_data['refresh']
-            print(refresh_token)
-            token = RefreshToken(refresh_token)
-            print(token)
-            token.blacklist()
-            return Response({
-                "detail": "logout sussessfully"
-            }, status=200)
-        except TokenError:
-            return Response({
-                "detail": "Invalid or expired token"
-            }, status=400)
-
-
-class VerifyTokenAPIView(generics.GenericAPIView):
-    serializer_class = VerifyTokenSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        token = serializer.validated_data['token']
-        
-        try:
-            UntypedToken(token)
-            return Response({"detail": "Token is valid"}, status=200)
-        except (InvalidToken, TokenError):
-            return Response({"detail": "Invalid token"}, status=400)
