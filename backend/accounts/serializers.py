@@ -40,15 +40,4 @@ class LoginSerializer(serializers.Serializer):
                 )
         attrs['user'] = user
         return attrs
-
-class LogoutSerializer(serializers.Serializer):
-    refresh = serializers.CharField(
-        max_length=255, required=True, write_only=True
-    )
-
-class VerifyTokenSerializer(serializers.Serializer):
-    token = serializers.CharField(
-        max_length=255, required=True, write_only=True
-    )
-
     
