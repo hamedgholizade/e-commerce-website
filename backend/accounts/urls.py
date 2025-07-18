@@ -1,19 +1,22 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.views import (
+    TokenBlacklistView,
+    TokenRefreshView,
+    TokenVerifyView
+)
 
 from accounts.views import (
     RegisterAPIView,
-    LoginAPIView,
-    LogoutAPIView,
-    VerifyTokenAPIView
+    LoginAPIView
 )
 
 
 urlpatterns = [
     path('register/', RegisterAPIView.as_view(), name='accounts-register'),
     path('login/', LoginAPIView.as_view(), name='login-token'),
-    path('logout/', LogoutAPIView.as_view(), name='logout-token'),
+    path('token/blacklist', TokenBlacklistView.as_view(), name='blacklist-token'),
     path('token/refresh/', TokenRefreshView.as_view(), name='refresh-token'),
-    path('token/verify/', VerifyTokenAPIView.as_view(), name='verify-token'),
+    path('token/verify/', TokenVerifyView.as_view(), name='verify-token'),
     
 ]
