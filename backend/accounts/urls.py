@@ -8,13 +8,15 @@ from rest_framework_simplejwt.views import (
 
 from accounts.views import (
     RegisterAPIView,
-    LoginAPIView
+    LoginAPIView,
+    OTPLoginAPIView
 )
 
 
 urlpatterns = [
     path('register/', RegisterAPIView.as_view(), name='accounts-register'),
     path('login/', LoginAPIView.as_view(), name='login-token'),
+    path('login/otp/', OTPLoginAPIView.as_view(), name='login-otp'),
     path('token/blacklist', TokenBlacklistView.as_view(), name='blacklist-token'),
     path('token/refresh/', TokenRefreshView.as_view(), name='refresh-token'),
     path('token/verify/', TokenVerifyView.as_view(), name='verify-token'),
