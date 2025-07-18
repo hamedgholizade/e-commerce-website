@@ -41,3 +41,20 @@ class LoginSerializer(serializers.Serializer):
         attrs['user'] = user
         return attrs
     
+
+class OTPLoginSerializer(serializers.Serializer):
+    email_or_phone = serializers.CharField(max_length=50, required=True)
+    otp_code = serializers.CharField(required=False, allow_blank=True)
+
+    def validate(self, attrs):
+        email_or_phone = attrs.get('email_or_phone')
+
+        if email_or_phone.isdigit() and len(email_or_phone) >= 10:
+            attrs['mode'] = 'phone'
+            user = User.objects.filter(phone=email_or_phone).first()
+        elif '@' in email_or_phone:
+            attrs['mode'] = 'email'
+            user = User.objects.filter(email=email_or_phone).first()
+        attrs['user'] = user
+        return attrs
+    
