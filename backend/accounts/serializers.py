@@ -1,6 +1,14 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+
+from accounts.utils import (
+    custom_normalize_email,
+    custom_normalize_phone,
+    custom_validate_email,
+    custom_validate_phone
+)
 
 User = get_user_model()
 
@@ -18,20 +26,53 @@ class RegisterSerializer(serializers.ModelSerializer):
             'is_seller',
             'picture'
             ]
-
-    def create(self, validated_data):
-        phone = validated_data.get("phone")
-        validated_data['username'] = phone
-        return super().create(validated_data)
+        
+    def validate_phone(self, value):
+        value = custom_normalize_phone(value)
+        if value:
+            return value
+        raise serializers.ValidationError(
+                "Invalid phone number"
+            )
     
+    def validate_email(self, value):
+        value = custom_normalize_email(value)
+        if value:
+            return value
+        raise serializers.ValidationError(
+                "Invalid email address"
+            )
+        
+    def validate_password(self, value):
+        validate_password(value)
+        return value
+    
+    def create(self, validated_data):
+        instance = User.objects.create_user(**validated_data)
+        return instance
+
 
 class LoginSerializer(serializers.Serializer):
-    phone_or_email = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+    email_or_phone = serializers.CharField(max_length=100, required=True)
+    password = serializers.CharField(
+        write_only=True, max_length=128, min_length=8,style={'input_type': 'password'}
+    )
+    
+    def validate_email_or_phone(self, value):
+        normalized_phone = custom_normalize_phone(value)
+        normalized_email = custom_normalize_email(value)
+        if normalized_phone:
+            return normalized_phone
+        elif normalized_email:
+            return normalized_email
+        else:
+            raise serializers.ValidationError(
+                "Invalid phone number or email address"
+            )
 
     def validate(self, attrs):
         user = authenticate(
-            username=attrs['phone_or_email'],
+            username=attrs['email_or_phone'],
             password=attrs['password']
         )
         if not user:
@@ -43,18 +84,36 @@ class LoginSerializer(serializers.Serializer):
     
 
 class OTPLoginSerializer(serializers.Serializer):
-    email_or_phone = serializers.CharField(max_length=50, required=True)
-    otp_code = serializers.CharField(required=False, allow_blank=True)
+    email_or_phone = serializers.CharField(max_length=100, required=True)
+    otp_code = serializers.CharField(
+        max_length=16, required=False, allow_blank=True
+    )
 
+    def validate_email_or_phone(self, value):
+        normalized_phone = custom_normalize_phone(value)
+        normalized_email = custom_normalize_email(value)
+        if normalized_phone:
+            return normalized_phone
+        elif normalized_email:
+            return normalized_email
+        else:
+            raise serializers.ValidationError(
+                "Invalid phone number or email address"
+            )
+    
     def validate(self, attrs):
         email_or_phone = attrs.get('email_or_phone')
 
-        if email_or_phone.isdigit() and len(email_or_phone) >= 10:
+        if custom_validate_phone(email_or_phone):
             attrs['mode'] = 'phone'
             user = User.objects.filter(phone=email_or_phone).first()
-        elif '@' in email_or_phone:
+        elif custom_validate_email(email_or_phone):
             attrs['mode'] = 'email'
             user = User.objects.filter(email=email_or_phone).first()
+        if not user:    
+            raise serializers.ValidationError(
+                "No active account found with the given credential"
+            )
         attrs['user'] = user
         return attrs
     
