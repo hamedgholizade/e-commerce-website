@@ -1,10 +1,11 @@
 import random
 from django.core.cache import cache
 from django.contrib.auth import get_user_model
-from rest_framework import generics, permissions
+from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from accounts.utils import send_custom_email
 from accounts.serializers import (
     RegisterSerializer,
     LoginSerializer,
@@ -28,7 +29,7 @@ class RegisterAPIView(generics.CreateAPIView):
             'user': serializer.data,
             'access': str(refresh.access_token),
             'refresh': str(refresh)
-        }, status=201)
+        }, status=status.HTTP_201_CREATED)
     
     
 class LoginAPIView(generics.CreateAPIView):
@@ -44,7 +45,7 @@ class LoginAPIView(generics.CreateAPIView):
             'message': 'User logged in successfully',
             'access': str(refresh.access_token),
             'refresh': str(refresh)
-        }, status=200)
+        }, status=status.HTTP_200_OK)
 
 
 class OTPLoginAPIView(generics.CreateAPIView):
@@ -60,35 +61,41 @@ class OTPLoginAPIView(generics.CreateAPIView):
         
         mode = serializer.validated_data['mode']
         user = serializer.validated_data['user']
-        if not user:
-            return Response({
-                "error": "Invalid phone number or email address"
-            }, status=400)
-        key = f"otp:{mode}:{email_or_phone}"
-        
+        key = f"otp-sent:{mode}:{email_or_phone}"
+            
         if otp_code:
             cached_code = cache.get(key)
             if cached_code != otp_code:
                 return Response({
                     "error": "otp code is invalid or expired"
                 }, status=400)
-            cache.delete(key)
             refresh = RefreshToken.for_user(user)
+            cache.delete(key)
             return Response({
                 'message': 'User logged in successfully with OTP',
                 'access': str(refresh.access_token),
                 'refresh': str(refresh)
             }, status=200)
-
+        
+        if cache.get(key):
+            return Response({
+                "error": "Please wait before requesting another OTP."
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+        
         code = str(random.randint(10000, 99999))
         cache.set(key, code, timeout=120)
         
         if mode == 'phone':
             return Response({
-                "message": f"sending sms to {email_or_phone}"
+                "message": f"sending sms to {email_or_phone}",
+                "otp": f"{code}"
             }, status=202)
         
         elif mode == 'email':
+            subject = 'Your OTP Code'
+            message = f'Your verification code is: {code}'
+            recipient = [email_or_phone]
+            send_custom_email(subject, message, recipient)
             return Response({
                 "message": f"sending email to {email_or_phone}"
             }, status=202)    
