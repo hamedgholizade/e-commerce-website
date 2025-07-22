@@ -4,12 +4,16 @@ from django.contrib.auth import get_user_model
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from base.permissions import IsOwnerProfile
 from accounts.utils import send_custom_email
 from accounts.serializers import (
     RegisterSerializer,
     LoginSerializer,
-    OTPLoginSerializer
+    OTPLoginSerializer,
+    UserViewProfileSerializer,
+    UserUpdateProfileSerializer
 )
 
 User = get_user_model()
@@ -99,4 +103,17 @@ class OTPLoginAPIView(generics.CreateAPIView):
             return Response({
                 "message": f"sending email to {email_or_phone}"
             }, status=202)    
-            
+    
+    
+class UserProfileAPIView(generics.RetrieveUpdateAPIView):
+    queryset = User.objects.active()
+    permission_classes = [IsOwnerProfile]
+    authentication_classes = [JWTAuthentication]
+    
+    def get_serializer_class(self):
+        if self.request.method in ["PUT", "PATCH"]:
+            return UserUpdateProfileSerializer
+        return UserViewProfileSerializer
+    
+    def get_object(self):
+        return self.request.user   

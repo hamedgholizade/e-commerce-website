@@ -9,9 +9,9 @@ from rest_framework_simplejwt.views import (
 from accounts.views import (
     RegisterAPIView,
     LoginAPIView,
-    OTPLoginAPIView
+    OTPLoginAPIView,
+    UserProfileAPIView
 )
-
 
 urlpatterns = [
     path('register/', RegisterAPIView.as_view(), name='accounts-register'),
@@ -20,5 +20,6 @@ urlpatterns = [
     path('token/blacklist', TokenBlacklistView.as_view(), name='blacklist-token'),
     path('token/refresh/', TokenRefreshView.as_view(), name='refresh-token'),
     path('token/verify/', TokenVerifyView.as_view(), name='verify-token'),
+    path('profile/', UserProfileAPIView.as_view(), name='accounts-profile'),
     
 ]
