@@ -43,5 +43,5 @@ class Address(BaseModel):
         return super().save(*args, **kwargs)
     
     def __str__(self):
-        return f"{self.address_line_1}, {self.city}, {self.city.country}"
+        return f"{self.address_line_1}, {self.city}, {self.country}"
     
