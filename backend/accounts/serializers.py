@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
+from locations.serializers import AddressSerializer
+from locations.models import Address
 from accounts.utils import (
     custom_normalize_email,
     custom_normalize_phone,
@@ -116,4 +118,41 @@ class OTPLoginSerializer(serializers.Serializer):
             )
         attrs['user'] = user
         return attrs
+
+
+class UserViewProfileSerializer(serializers.ModelSerializer):
+    addresses = AddressSerializer(many=True, read_only=True)
+    picture = serializers.ImageField(required=False, allow_null=True)
     
+    class Meta:
+        model = User
+        fields = '__all__'
+    
+        read_only_fields = [
+            'is_seller',
+            'is_active',
+            'created_at',
+            'updated_at'
+        ]
+    
+class UserUpdateProfileSerializer(serializers.ModelSerializer):
+    addresses = AddressSerializer(many=True, read_only=True)
+    picture = serializers.ImageField(required=False, allow_null=True)
+    
+    class Meta:
+        model = User
+        fields = [
+            'phone',
+            'email',
+            'first_name',
+            'last_name',
+            'picture',
+            'addresses'
+        ]        
+    
+    def update(self, instance, validated_data):
+        picture = validated_data.pop('picture', None)
+        if picture is not None:
+            instance.picture = picture
+        instance = super().update(instance, validated_data)
+        return instance
