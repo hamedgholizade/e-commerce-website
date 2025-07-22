@@ -56,11 +56,9 @@ class BaseModel(models.Model):
         """
         Marks the object as removed by setting the is_active field to False.
         """
-        if self.removed_at is None:
-            self.is_active = False
-            self.save(update_fields=['is_active'])
-            return True
-        return False
+        self.is_active = False
+        self.save(update_fields=['is_active'])
+        return True
         
     def hard_delete(self):
         """
@@ -72,9 +70,8 @@ class BaseModel(models.Model):
         """
         Restores the object by setting is_active to True.
         """
-        if self.removed_at is not None:
-            self.is_active = True
-            self.save(update_fields=['is_active'])
-            return True
-        return False
+        self.is_active = True
+        self.save(update_fields=['is_active'])
+        return True
+
     
