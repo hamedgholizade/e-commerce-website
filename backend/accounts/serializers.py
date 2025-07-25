@@ -126,7 +126,7 @@ class UserViewProfileSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = '__all__'
+        exclude = ['password']
     
         read_only_fields = [
             'is_seller',
@@ -146,6 +146,7 @@ class UserUpdateProfileSerializer(serializers.ModelSerializer):
             'email',
             'first_name',
             'last_name',
+            'password',
             'picture',
             'addresses'
         ]        
