@@ -7,7 +7,6 @@ from products.models.product_model import Product
 from orders.models import OrderItem
 from stores.models import StoreItem
 
-
 class ProductImageSerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -39,9 +38,8 @@ class CategorySerializer(serializers.ModelSerializer):
         ]
     
     def create(self, validated_data):
-        if validated_data['image']:
-            return super().create(validated_data)
-        validated_data.pop('image')
+        if not validated_data.get('image'):
+            validated_data.pop('image', None)
         return super().create(validated_data)
 
 
@@ -95,5 +93,12 @@ class ProductSerializer(serializers.ModelSerializer):
                 product=obj, store=store_id
             ).active().first()
             if store_item:
-                return store_item
+                return {
+                    "store_id": store_item.store.id,
+                    "store_name": store_item.store.name,
+                    "product_id": store_item.product.id,
+                    "product_name": store_item.product.name,
+                    "price": store_item.price,
+                    "discount_price": store_item.discount_price
+                }
         return None
