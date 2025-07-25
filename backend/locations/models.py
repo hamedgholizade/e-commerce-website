@@ -19,10 +19,10 @@ class Address(BaseModel):
         null=True,
         blank=True
     )
-    store = models.ForeignKey(
+    store = models.OneToOneField(
         Store,
         on_delete=models.CASCADE,
-        related_name='addresses',
+        related_name='address',
         null=True,
         blank=True
     )
