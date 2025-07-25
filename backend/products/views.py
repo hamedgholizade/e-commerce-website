@@ -45,13 +45,13 @@ class CategoryModelViewSet(ModelViewSet):
         instance.soft_delete()
 
     @action(methods=['GET'], detail=True)
-    def ancestors(self, request, pk=None):
+    def parents(self, request, pk=None):
         category = self.get_object()
-        ancestors = self._get_ancestors(category=category)
-        serializer = self.get_serializer(ancestors, many=True)
+        parents = self._get_parents(category=category)
+        serializer = self.get_serializer(parents, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def _get_ancestors(self, category):
+    def _get_parents(self, category):
         result = []
         current = category.parent
         while current:
@@ -61,17 +61,17 @@ class CategoryModelViewSet(ModelViewSet):
 
 
     @action(methods=['GET'], detail=True)
-    def descendants(self, request, pk=None):
-        root = self.get_object()
-        descendants = self._get_descendants(root=root)
-        serializer = self.get_serializer(descendants, many=True)
+    def children(self, request, pk=None):
+        category = self.get_object()
+        children = self._get_children(category=category)
+        serializer = self.get_serializer(children, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def _get_descendants(self, root):
+    def _get_children(self, category):
         result = []
         def recurse(node):
             for child in node.subcategories.all():
                 result.append(child)
                 recurse(child)
-        recurse(root)
+        recurse(category)
         return result
