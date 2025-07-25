@@ -13,8 +13,8 @@ class Store(BaseModel):
     """
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
-    seller = models.ForeignKey(
-        User, related_name='stores', on_delete=models.CASCADE
+    seller = models.OneToOneField(
+        User, related_name='store', on_delete=models.CASCADE
     )
 
     def __str__(self):
