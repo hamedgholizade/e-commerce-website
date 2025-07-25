@@ -17,14 +17,10 @@ class Cart(BaseModel):
         on_delete=models.CASCADE,
         related_name='carts'
     )
-    total_price = models.CharField(
-        max_length=100, blank=True, null=True
-    )
     
     @property
     def total_price(self):
-        self.total_price = sum(self.items.total_price())
-        return self.total_price
+        return sum(item.total_price for item in self.items.all())
 
     def __str__(self):
         return f"Cart of {self.user.phone}"
