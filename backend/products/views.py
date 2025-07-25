@@ -11,7 +11,8 @@ from products.models.product_model import Product
 from products.serializers import (
     CategorySerializer,
     ProductSerializer,
-    ProductImageSerializer
+    ProductImageSerializer,
+    SellerProductSerializer
 )
 
 
@@ -27,9 +28,13 @@ class ProductImageModelViewSet(ModelViewSet):
 
 class ProductModelViewSet(ModelViewSet):
     queryset = Product.objects.active()
-    serializer_class = ProductSerializer
     permission_classes = [IsAdminOrSellerOrReadOnly]
     authentication_classes = [JWTAuthentication]
+    
+    def get_serializer_class(self):
+        if self.request.user.is_authenticated and self.request.user.is_seller:
+            return SellerProductSerializer
+        return ProductSerializer
 
     def perform_destroy(self, instance):
         instance.soft_delete()

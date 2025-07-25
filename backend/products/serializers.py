@@ -102,3 +102,10 @@ class ProductSerializer(serializers.ModelSerializer):
                     "discount_price": store_item.discount_price
                 }
         return None
+
+
+class SellerProductSerializer(ProductSerializer):
+    
+    def create(self, validated_data):
+        validated_data['is_active'] = False
+        return super().create(validated_data)
