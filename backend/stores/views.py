@@ -1,6 +1,6 @@
-from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.exceptions import PermissionDenied
 
 from stores.permissions import IsAdminOrSellerOrReadOnly
 from stores.models import (
@@ -24,7 +24,21 @@ class StoreModelViewSet(ModelViewSet):
             return self.queryset.filter(seller=self.request.user)
         return self.queryset
     
+    def perform_create(self, serializer):
+        seller = serializer.validated_data['seller']
+        if seller != self.request.user.id:
+            raise PermissionDenied("Can't create store you don't own")
+        serializer.save()
+        
+    def perform_update(self, serializer):
+        seller = serializer.validated_data.get('seller', serializer.instance.seller)
+        if seller != self.request.user.id:
+            raise PermissionDenied("Can't update store you don't own.")
+        serializer.save()
+    
     def perform_destroy(self, instance):
+        if instance.seller != self.request.user:
+            raise PermissionDenied("Can't delete store you don't own.")
         instance.soft_delete()
 
 
@@ -39,5 +53,20 @@ class StoreItemModelViewSet(ModelViewSet):
             return self.queryset.filter(store__seller=self.request.user)
         return self.queryset
     
+    def perform_create(self, serializer):
+        store = serializer.validated_data['store']
+        user = self.request.user
+        if store.seller != user:
+            raise PermissionDenied("Can't create item of a store you don't own")
+        serializer.save()
+        
+    def perform_update(self, serializer):
+        store = serializer.validated_data.get('store', serializer.instance.store)
+        if store.seller != self.request.user:
+            raise PermissionDenied("Can't update item of a store you don't own.")
+        serializer.save()
+
     def perform_destroy(self, instance):
+        if instance.store.seller != self.request.user:
+            raise PermissionDenied("Can't delete item of a store you don't own.")
         instance.soft_delete()

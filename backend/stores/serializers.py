@@ -10,8 +10,6 @@ from stores.models import (
 
 
 class StoreSerializer(serializers.ModelSerializer):
-    address  = AddressSerializer(read_only=True) 
-    seller = UserViewProfileSerializer(read_only=True)
     
     class Meta:
         model = Store
@@ -25,8 +23,6 @@ class StoreSerializer(serializers.ModelSerializer):
 
 
 class StoreItemSerializer(serializers.ModelSerializer):
-    store = StoreSerializer(read_only=True)
-    product = ProductSerializer(read_only=True)
     
     class Meta:
         model = StoreItem
