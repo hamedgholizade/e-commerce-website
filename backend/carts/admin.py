@@ -28,6 +28,8 @@ class CartItemAdmin(BaseAdmin):
     list_display = ['cart__user__phone',
                     'store_item__product__name',
                     'quantity',
+                    'unit_price',
+                    'total_price',
                     'created_at',
                     'updated_at'
                     ]
