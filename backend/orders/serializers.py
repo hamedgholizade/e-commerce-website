@@ -10,7 +10,7 @@ from orders.models import (
 
 class OrderItemSerializer(serializers.ModelSerializer):
     store_item_data = StoreItemSerializer(read_only=True)
-    get_unit_price = serializers.CharField(read_only=True)
+    get_price = serializers.CharField(read_only=True)
     get_total_price = serializers.CharField(read_only=True)
     
     class Meta:
@@ -55,6 +55,7 @@ class OrderSerializer(serializers.ModelSerializer):
         ]
         
         read_only_fields = [
+            'customer',
             'is_active',
             'created_at',
             'updated_at'
@@ -62,24 +63,26 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def validate_address(self, value):
         user = self.context['request'].user
-        if not user.addresses.active().filter(id=value).exists():
+        address_id = value.id if hasattr(value, 'id') else value
+
+        if not user.addresses.active().filter(id=address_id).exists():
             raise serializers.ValidationError('Wrong address selected')
         return value
     
     def create(self, validated_data):
         user = self.context['request'].user
-        address = validated_data.get('address')
-        user_cart = Cart.objects.filter(user=user).active().first()
+        address = validated_data.pop('address')
+        user_cart = Cart.objects.filter(user=user, is_active=True).first()
         if not user_cart:
             raise serializers.ValidationError('Your cart is empty')
         user_cart_items = user_cart.items.active()
         if not user_cart_items:
             raise serializers.ValidationError('Your cart is empty')
-        total = validated_data.get('get_total_price')
+        total = user_cart.total_price
         order = Order.objects.create(
             customer=user,
             address=address,
-            total_price=total,
+            total_price=str(total),
             status=1
         )
         for item in user_cart_items:

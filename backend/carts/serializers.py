@@ -27,6 +27,7 @@ class CartItemSerializer(serializers.ModelSerializer):
             'updated_at'
         ]
         read_only_fields = [
+            'cart',
             'is_active',
             'created_at',
             'updated_at'
@@ -34,8 +35,8 @@ class CartItemSerializer(serializers.ModelSerializer):
         
     def create(self, validated_data):
         user = self.context['request'].user
-        store_item = validated_data.pop['store_item']
-        quantity = validated_data.pop['quantity']
+        store_item = validated_data.pop('store_item')
+        quantity = validated_data.pop('quantity')
         cart, _ = Cart.objects.get_or_create(user=user)
         cart_item, created = CartItem.objects.get_or_create(
             cart=cart, store_item=store_item
