@@ -64,6 +64,6 @@ class SellerOrderDetailAPIView(generics.RetrieveUpdateAPIView):
         status_text = Order.ORDER_STATUS_CHOICES[instance.status]
         subject = 'Changing Order status'
         message = f'your order status is change to {status_text}'
-        recipient = instance.customer.email
+        recipient = [instance.customer.email]
         send_custom_email(subject, message, recipient)
         

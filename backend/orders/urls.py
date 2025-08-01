@@ -10,9 +10,9 @@ from orders.views import (
 
 urlpatterns = [
     path('order/', OrderListAPIView.as_view(), name='order-list'),
-    path('order/<int:id>/', OrderDetailAPIView.as_view(), name='order-detail'),
+    path('order/<int:pk>/', OrderDetailAPIView.as_view(), name='order-detail'),
     path('seller/', SellerOrderListAPIView.as_view(), name='seller-order-list'),
-    path('seller/<int:id>/', SellerOrderDetailAPIView.as_view(), name='seller-order-detail'),
+    path('seller/<int:pk>/', SellerOrderDetailAPIView.as_view(), name='seller-order-detail'),
     
 ]
 
