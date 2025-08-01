@@ -179,6 +179,12 @@ CACHES = {
     }
 }
 
+# save Celery task results in Redis's database
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')
+
+# This configures Redis as the datastore between Redis + Celery
+CELERY_BROKER_URL = config('CELERY_BROKER_REDIS_URL')
+
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST')
