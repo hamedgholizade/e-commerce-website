@@ -1,9 +1,9 @@
-from rest_framework import generics, mixins
+from rest_framework import generics
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from orders.models import Order
 from orders.serializers import OrderSerializer
-from orders.utils import send_custom_email
+from orders.tasks import send_order_status_email
 from orders.permissions import (
     IsOrderOwner,
     IsSeller
@@ -61,9 +61,7 @@ class SellerOrderDetailAPIView(generics.RetrieveUpdateAPIView):
         
     def perform_update(self, serializer):
         instance = serializer.save()
-        status_text = Order.ORDER_STATUS_CHOICES[instance.status]
-        subject = 'Changing Order status'
-        message = f'your order status is change to {status_text}'
-        recipient = [instance.customer.email]
-        send_custom_email(subject, message, recipient)
+        status_text = instance.get_status_display_text
+        send_order_status_email.delay(status_text, instance.customer.email)
+        
         
