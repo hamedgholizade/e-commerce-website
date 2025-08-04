@@ -1,12 +1,7 @@
-from django.core.mail import send_mail
-from django.conf import settings
 from django.core.validators import validate_email as django_validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
 import phonenumbers
 from phonenumbers.phonenumberutil import NumberParseException
-
-def send_custom_email(subject, message, recipient_list):
-    send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
 
 
 def custom_normalize_email(email: str) -> str | None:

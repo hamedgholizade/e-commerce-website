@@ -7,7 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from base.permissions import IsOwnerProfile
-from accounts.utils import send_custom_email
+from accounts.tasks import send_otp_email
 from accounts.serializers import (
     RegisterSerializer,
     LoginSerializer,
@@ -96,10 +96,7 @@ class OTPLoginAPIView(generics.CreateAPIView):
             }, status=202)
         
         elif mode == 'email':
-            subject = 'Your OTP Code'
-            message = f'Your verification code is: {code}'
-            recipient = [email_or_phone]
-            send_custom_email(subject, message, recipient)
+            send_otp_email.delay(code, email_or_phone)
             return Response({
                 "message": f"sending email to {email_or_phone}"
             }, status=202)    
