@@ -22,6 +22,7 @@ class CartDetailAPIView(generics.RetrieveDestroyAPIView):
         obj, _ = Cart.objects.get_or_create(user=self.request.user)
         self.check_object_permissions(self.request, obj)
         return obj
+        
 
     def perform_destroy(self, instance):
         instance.soft_delete()
@@ -38,7 +39,7 @@ class CartItemListAPIView(generics.ListCreateAPIView):
     
     def perform_create(self, serializer):
         cart, _ = Cart.objects.get_or_create(
-            user = self.request.user
+            user = self.request.user, is_active=True
         )
         serializer.save(cart=cart)
         

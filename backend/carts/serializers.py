@@ -39,7 +39,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         quantity = validated_data.pop('quantity')
         cart, _ = Cart.objects.get_or_create(user=user)
         cart_item, created = CartItem.objects.get_or_create(
-            cart=cart, store_item=store_item
+            cart=cart, store_item=store_item, is_active=True
         )
         if not created:
             cart_item.quantity += quantity
