@@ -45,7 +45,11 @@ class Order(BaseModel):
         for item in self.items.active():
             total += safe_float(item.total_price)
         return str(total)
-        
+    
+    @property
+    def get_status_display_text(self):
+        return dict(self.ORDER_STATUS_CHOICES).get(self.status, "نامشخص")
+    
     def save(self, *args, **kwargs):
         if self.pk:
             self.total_price = self.get_total_price
