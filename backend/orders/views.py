@@ -27,7 +27,6 @@ class OrderDetailAPIView(generics.RetrieveAPIView):
     serializer_class = OrderSerializer
     authentication_classes = [JWTAuthentication]   
     
-    
     def get_queryset(self):
         return Order.objects.filter(
             customer=self.request.user, is_active=True
