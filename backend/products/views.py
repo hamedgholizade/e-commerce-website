@@ -5,6 +5,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from products.permissions import IsAdminOrSellerOrReadOnly
+from products.paginations import ProductPagination
 from products.models.category_model import Category
 from products.models.product_image_model import ProductImage
 from products.models.product_model import Product
@@ -30,6 +31,7 @@ class ProductModelViewSet(ModelViewSet):
     queryset = Product.objects.active()
     permission_classes = [IsAdminOrSellerOrReadOnly]
     authentication_classes = [JWTAuthentication]
+    pagination_class = ProductPagination
     
     def get_serializer_class(self):
         if self.request.user.is_authenticated and self.request.user.is_seller:
