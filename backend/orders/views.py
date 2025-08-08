@@ -63,4 +63,3 @@ class SellerOrderDetailAPIView(generics.RetrieveUpdateAPIView):
         status_text = instance.get_status_display_text
         send_order_status_email.delay(status_text, instance.customer.email)
         
-        
