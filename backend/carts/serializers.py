@@ -51,6 +51,7 @@ class CartItemSerializer(serializers.ModelSerializer):
     
 class CartSerializer(serializers.ModelSerializer):
     total_price = serializers.FloatField(read_only=True)
+    total_discount = serializers.SerializerMethodField(read_only=True)
     items = CartItemSerializer(many=True, read_only=True)
     
     class Meta:
@@ -59,6 +60,7 @@ class CartSerializer(serializers.ModelSerializer):
             'id',
             'user',
             'total_price',
+            'total_discount',
             'is_active',
             'created_at',
             'updated_at',
@@ -69,3 +71,13 @@ class CartSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at'
         ]
+        
+    def get_total_discount(self, obj):
+        total = 0
+        for item in obj.items.active():
+            if item.discount_price:
+                total += item.discount_price
+            else:
+                continue
+        return total
+    
