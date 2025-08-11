@@ -19,6 +19,19 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework.permissions import IsAuthenticated
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="E Commerce Website",
+        default_version='v1',
+        description="our DjangoRestFramework swagger on E-commerce-Website"
+    ),
+    public=True,
+    permission_classes=[IsAuthenticated]
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -30,6 +43,7 @@ urlpatterns = [
     path('api/orders/', include('orders.urls')),
     path('api/reviews/', include('reviews.urls')),
     path('api/payments/', include('payments.urls')),
+    path('swagger/', schema_view.with_ui(), name='schema-swagger-ui'),
     
 ]
 
