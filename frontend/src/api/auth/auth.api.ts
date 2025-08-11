@@ -9,7 +9,7 @@ import axios from "axios";
 
 export async function requestOtp(data: RequestOtpPayload) {
   const res = await axios.post<RequestOtpResponse>(
-    baseURL + "accounts/request-otp/",
+    baseURL + "accounts/login/otp/",
     data,
   );
   return res.data;
@@ -17,7 +17,7 @@ export async function requestOtp(data: RequestOtpPayload) {
 
 export async function verifyOtp(data: RequestVerifyPayload) {
   const res = await axios.post<RequestVerifyResponse>(
-    baseURL + "accounts/verify-otp/",
+    baseURL + "accounts/token/verify/",
     data,
   );
   return res.data;
