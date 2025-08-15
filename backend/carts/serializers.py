@@ -9,8 +9,8 @@ from carts.models import (
 
 class CartItemSerializer(serializers.ModelSerializer):
     store_item_data = StoreItemSerializer(read_only=True)
-    unit_price = serializers.FloatField(read_only=True)
-    total_price = serializers.FloatField(read_only=True)
+    unit_price = serializers.SerializerMethodField(read_only=True)
+    total_price = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = CartItem
@@ -32,6 +32,29 @@ class CartItemSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at'
         ]
+    
+    def get_unit_price(self, obj):
+        return str(obj.unit_price)
+    
+    def get_total_price(self, obj):
+        return str(obj.total_price)
+    
+    def validate_quantity(self, value):
+        if value < 1:
+            raise serializers.ValidationError(
+                "Quantity must be at least 1."
+            )
+        return value
+    
+    def validate(self, attrs):
+        store_item = attrs.get("store_item")
+        quantity = attrs.get("quantity", 1)
+        if store_item and hasattr(store_item, "stock"):
+            if quantity > store_item.stock:
+                raise serializers.ValidationError(
+                    "Quantity exceeds available stock"
+                )
+        return attrs
         
     def create(self, validated_data):
         user = self.context['request'].user
@@ -50,7 +73,7 @@ class CartItemSerializer(serializers.ModelSerializer):
     
     
 class CartSerializer(serializers.ModelSerializer):
-    total_price = serializers.FloatField(read_only=True)
+    total_price = serializers.SerializerMethodField(read_only=True)
     total_discount = serializers.SerializerMethodField(read_only=True)
     items = CartItemSerializer(many=True, read_only=True)
     
@@ -72,12 +95,9 @@ class CartSerializer(serializers.ModelSerializer):
             'updated_at'
         ]
         
+    def get_total_price(self, obj):
+        return str(obj.total_price)
+        
     def get_total_discount(self, obj):
-        total = 0
-        for item in obj.items.active():
-            if item.discount_price:
-                total += item.discount_price
-            else:
-                continue
-        return total
+        return str(obj.total_discount)
     
