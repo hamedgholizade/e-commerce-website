@@ -25,21 +25,30 @@ class StoreModelViewSet(ModelViewSet):
         return self.queryset
     
     def perform_create(self, serializer):
+        user = self.request.user
         seller = serializer.validated_data['seller']
-        if seller != self.request.user.id:
+        if user.is_staff or user.is_superuser:
+            return serializer.save()
+        if seller != user:
             raise PermissionDenied("Can't create store you don't own")
-        serializer.save()
+        return serializer.save()
         
     def perform_update(self, serializer):
+        user = self.request.user
         seller = serializer.validated_data.get('seller', serializer.instance.seller)
-        if seller != self.request.user.id:
+        if user.is_staff or user.is_superuser:
+            return serializer.save()
+        if seller != user:
             raise PermissionDenied("Can't update store you don't own.")
-        serializer.save()
+        return serializer.save()
     
     def perform_destroy(self, instance):
-        if instance.seller != self.request.user:
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return instance.soft_delete()
+        if instance.seller != user:
             raise PermissionDenied("Can't delete store you don't own.")
-        instance.soft_delete()
+        return instance.soft_delete()
 
 
 class StoreItemModelViewSet(ModelViewSet):
@@ -56,17 +65,25 @@ class StoreItemModelViewSet(ModelViewSet):
     def perform_create(self, serializer):
         store = serializer.validated_data['store']
         user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return serializer.save()
         if store.seller != user:
             raise PermissionDenied("Can't create item of a store you don't own")
-        serializer.save()
+        return serializer.save()
         
     def perform_update(self, serializer):
         store = serializer.validated_data.get('store', serializer.instance.store)
-        if store.seller != self.request.user:
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return serializer.save()
+        if store.seller != user:
             raise PermissionDenied("Can't update item of a store you don't own.")
-        serializer.save()
+        return serializer.save()
 
     def perform_destroy(self, instance):
-        if instance.store.seller != self.request.user:
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return instance.soft_delete()
+        if instance.store.seller != user:
             raise PermissionDenied("Can't delete item of a store you don't own.")
-        instance.soft_delete()
+        return instance.soft_delete()

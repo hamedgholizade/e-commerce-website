@@ -5,6 +5,8 @@ from stores.views import (
     StoreItemModelViewSet
 )
 
+app_name='stores'
+
 router = DefaultRouter()
 router.register('store', StoreModelViewSet)
 router.register('store_item', StoreItemModelViewSet)
