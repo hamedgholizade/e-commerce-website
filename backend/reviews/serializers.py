@@ -50,6 +50,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             'created_at'
         ]
         read_only_fields = [
+            'user',
             'is_active',
             'updated_at',
             'created_at'
@@ -78,4 +79,8 @@ class ReviewSerializer(serializers.ModelSerializer):
                         "You already submitted a comment for this store."
                     )
         return attrs
+    
+    def create(self, validated_data):
+        validated_data["user"] = self.context["request"].user
+        return super().create(validated_data)
     
