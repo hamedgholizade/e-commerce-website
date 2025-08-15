@@ -1,5 +1,7 @@
+from django.db import transaction
 from rest_framework import serializers
 
+from stores.models import StoreItem
 from stores.serializers import StoreItemSerializer
 from carts.models import Cart
 from orders.models import (
@@ -69,6 +71,7 @@ class OrderSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Wrong address selected')
         return value
     
+    @transaction.atomic
     def create(self, validated_data):
         user = self.context['request'].user
         address = validated_data.pop('address')
@@ -78,6 +81,15 @@ class OrderSerializer(serializers.ModelSerializer):
         user_cart_items = user_cart.items.active()
         if not user_cart_items:
             raise serializers.ValidationError('Your cart is empty')
+        
+        locked_ids = [
+            item.store_item_id for item in user_cart_items
+        ]
+        locked_items = {
+            si.id: si for si in StoreItem.objects.select_for_update().filter(
+                id__in=locked_ids
+            )
+        }
         total = user_cart.total_price
         order = Order.objects.create(
             customer=user,
@@ -92,7 +104,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     f"Not enough exist of {store_item.product.name}"
                     )
             store_item.stock -= item.quantity
-            store_item.save()
+            store_item.save(update_fields=["stock"])
             OrderItem.objects.create(
                 order=order,
                 store_item=item.store_item,
@@ -100,7 +112,9 @@ class OrderSerializer(serializers.ModelSerializer):
                 price=str(item.unit_price),
                 total_price=str(item.total_price)
             )
-        user_cart_items.soft_delete()
+        for item in user_cart_items:
+            item.soft_delete()
+            
         return order
     
     def update(self, instance, validated_data):
