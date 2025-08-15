@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    "django_celery_beat",
     "drf_yasg",
     "django_filters",
     # local apps
@@ -197,6 +198,9 @@ CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')
 # This configures Redis as the datastore between Redis + Celery
 CELERY_BROKER_URL = config('CELERY_BROKER_REDIS_URL')
 
+# This configrations for using database celery-beat
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST')
@@ -205,4 +209,3 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
 EMAIL_USE_SSL=config('EMAIL_USE_SSL', cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-
