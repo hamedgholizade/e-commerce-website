@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 
 from base.models import BaseModel
-from orders.utils import safe_float
+from orders.utils import safe_decimal
 from locations.models import Address
 from stores.models import StoreItem
 
@@ -30,7 +30,7 @@ class Order(BaseModel):
         User, on_delete=models.CASCADE, related_name='orders'
         )
     address = models.ForeignKey(
-        Address, on_delete=models.CASCADE, related_name='orders'
+        Address, on_delete=models.PROTECT, related_name='orders'
         )
     status = models.IntegerField(
         choices=ORDER_STATUS_CHOICES, default=ORDER_PENDING
@@ -43,7 +43,7 @@ class Order(BaseModel):
     def get_total_price(self):
         total = 0
         for item in self.items.active():
-            total += safe_float(item.total_price)
+            total += safe_decimal(item.total_price)
         return str(total)
     
     @property
@@ -89,7 +89,9 @@ class OrderItem(BaseModel):
     @property
     def get_total_price(self):
         if self.price and self.quantity > 0:
-            return str(safe_float(self.price) * self.quantity)
+            return str(
+                safe_decimal(self.price) * self.quantity
+            )
         return "0.0"
     
     def save(self, *args, **kwargs):

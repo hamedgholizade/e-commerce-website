@@ -1,6 +1,9 @@
-def safe_float(value):
+from decimal import Decimal, InvalidOperation
+
+
+def safe_decimal(value):
     try:
-        return float(value)
-    except (TypeError, ValueError):
+        return Decimal(str(value))
+    except (TypeError, InvalidOperation):
         return 0.0
     
