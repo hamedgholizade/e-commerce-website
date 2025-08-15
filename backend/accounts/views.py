@@ -66,15 +66,25 @@ class OTPLoginAPIView(generics.CreateAPIView):
         mode = serializer.validated_data['mode']
         user = serializer.validated_data['user']
         key = f"otp-sent:{mode}:{email_or_phone}"
+        attempts_key = f"otp-attempts:{mode}:{email_or_phone}"
             
         if otp_code:
+            attempts = cache.get(attempts_key, 0)
+            if attempts >= 5:
+                return Response(
+                    {"error": "Too many attempts, Try later."}
+                ,status=429)
+                
             cached_code = cache.get(key)
             if cached_code != otp_code:
+                cache.set(attempts_key, attempts+1, timeout=120)
                 return Response({
                     "error": "otp code is invalid or expired"
                 }, status=400)
+                
             refresh = RefreshToken.for_user(user)
             cache.delete(key)
+            cache.delete(attempts_key)
             return Response({
                 'message': 'User logged in successfully with OTP',
                 'access': str(refresh.access_token),
@@ -88,6 +98,7 @@ class OTPLoginAPIView(generics.CreateAPIView):
         
         code = str(random.randint(10000, 99999))
         cache.set(key, code, timeout=120)
+        cache.set(attempts_key, 0, timeout=120)
         
         if mode == 'phone':
             return Response({
