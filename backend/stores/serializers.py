@@ -1,7 +1,5 @@
 from rest_framework import serializers
 
-from products.serializers import ProductSerializer
-from accounts.serializers import UserViewProfileSerializer
 from locations.serializers import AddressSerializer
 from stores.models import (
     Store,
@@ -10,6 +8,7 @@ from stores.models import (
 
 
 class StoreSerializer(serializers.ModelSerializer):
+    address = AddressSerializer(read_only=True)
     
     class Meta:
         model = Store
