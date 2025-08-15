@@ -15,4 +15,4 @@ class PaymentListAPIView(ListAPIView):
     def get_queryset(self):
         return self.queryset.filter(
             order__customer=self.request.user
-            )
+            ).select_related('order')
