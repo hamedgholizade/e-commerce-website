@@ -4,7 +4,6 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from locations.serializers import AddressSerializer
-from locations.models import Address
 from accounts.utils import (
     custom_normalize_email,
     custom_normalize_phone,
@@ -16,6 +15,9 @@ User = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True, min_length=8
+    )
 
     class Meta:
         model = User
@@ -24,9 +26,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             'email',
             'password',
             'first_name',
-            'last_name',
-            'is_seller',
-            'picture'
+            'last_name'
             ]
         
     def validate_phone(self, value):
@@ -152,8 +152,13 @@ class UserUpdateProfileSerializer(serializers.ModelSerializer):
         ]        
     
     def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
         picture = validated_data.pop('picture', None)
         if picture is not None:
             instance.picture = picture
         instance = super().update(instance, validated_data)
+        if password:
+            instance.set_password(password)
+            instance.save(update_fields=['password'])
         return instance
+    
