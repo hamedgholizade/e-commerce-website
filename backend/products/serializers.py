@@ -1,3 +1,4 @@
+from decimal import Decimal, InvalidOperation
 from rest_framework import serializers
 from django.db.models import Sum
 
@@ -6,6 +7,7 @@ from products.models.product_image_model import ProductImage
 from products.models.product_model import Product
 from orders.models import OrderItem
 from stores.models import StoreItem
+
 
 class ProductImageSerializer(serializers.ModelSerializer):
     
@@ -44,10 +46,8 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    images = ProductImageSerializer(many=True, read_only=True)
-    category = CategorySerializer(many=True, read_only=True)
-    best_price = serializers.SerializerMethodField()
-    best_seller = serializers.SerializerMethodField()
+    best_price = serializers.SerializerMethodField(read_only=True)
+    best_seller = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Product
@@ -57,13 +57,12 @@ class ProductSerializer(serializers.ModelSerializer):
             'description',
             'stock',
             'rating',
+            'category',
             'best_price',
             'best_seller',
             'is_active',
             'created_at',
-            'updated_at',
-            'images',
-            'category'
+            'updated_at'
         ]
         read_only_fields = ['is_active', 'created_at', 'updated_at']
 
@@ -71,11 +70,12 @@ class ProductSerializer(serializers.ModelSerializer):
         items = obj.store_items.active()
         prices = []
         for item in items:
-            prices.append(
-                item.discount_price if item.discount_price 
-                else item.price
-                )
-        return min(prices) if prices else None
+            item_price = item.discount_price or item.price
+            try:
+                prices.append(Decimal(item_price))
+            except (InvalidOperation, TypeError):
+                continue
+        return str(min(prices)) if prices else None
     
     def get_best_seller(self, obj):
         best = (
