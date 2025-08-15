@@ -7,6 +7,7 @@ from orders.views import (
     SellerOrderDetailAPIView,
 )
 
+app_name='orders'
 
 urlpatterns = [
     path('order/', OrderListAPIView.as_view(), name='order-list'),
