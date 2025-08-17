@@ -6,6 +6,8 @@ from products.views import(
     CategoryModelViewSet
 )
 
+app_name='products'
+
 router = DefaultRouter()
 router.register('product', ProductModelViewSet)
 router.register('image', ProductImageModelViewSet)
