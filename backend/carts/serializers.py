@@ -100,4 +100,15 @@ class CartSerializer(serializers.ModelSerializer):
         
     def get_total_discount(self, obj):
         return str(obj.total_discount)
+
+
+class AddToCartSerializer(serializers.Serializer):
+    quantity = serializers.IntegerField(
+        required=False, allow_null=True
+    )
     
+    def validate(self, attrs):
+        if "quantity" not in attrs or attrs["quantity"] is None:
+            attrs["quantity"] = 1
+        return attrs
+
