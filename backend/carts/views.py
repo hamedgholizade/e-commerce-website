@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -6,12 +8,14 @@ from base.permissions import IsOwnerObject
 from carts.permissions import IsOwnerOfCartItem
 from carts.serializers import (
     CartItemSerializer,
-    CartSerializer
+    CartSerializer,
+    AddToCartSerializer
 )
 from carts.models import (
     CartItem,
     Cart
 )
+from stores.models import StoreItem
 
 class CartDetailAPIView(generics.RetrieveDestroyAPIView):
     serializer_class = CartSerializer
@@ -23,11 +27,49 @@ class CartDetailAPIView(generics.RetrieveDestroyAPIView):
         self.check_object_permissions(self.request, obj)
         return obj
         
-
     def perform_destroy(self, instance):
         instance.soft_delete()
         instance.items.active().soft_delete()
     
+    
+class AddToCartAPIView(generics.GenericAPIView):
+    serializer_class = AddToCartSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    def post(self, request, pk):
+        store_item = get_object_or_404(StoreItem, id=pk, is_active=True)
+        serializer = self.get_serializer(data=request.data or {})
+        serializer.is_valid(raise_exception=True)
+        quantity = serializer.validated_data["quantity"]
+        if store_item.stock < quantity:
+            return Response(
+                {"detail": "Not enough exist"}, status=400
+            )
+        cart, _ = Cart.objects.get_or_create(
+            user=request.user, is_active=True
+        )
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart, store_item=store_item
+        )
+        if created:
+            return Response({
+                "message": "Add to cart successfully",
+                "cart": CartSerializer(cart).data,
+            }, status=200)
+            
+        new_quantity = cart_item.quantity + quantity
+        if store_item.stock < new_quantity:
+            return Response(
+                {"detail": "Not enough exist"}, status=400
+            )
+        cart_item.quantity = new_quantity
+        cart_item.save()
+        return Response({
+                "message": "Add to cart successfully",
+                "cart": CartSerializer(cart).data,
+            }, status=200)
+        
 
 class CartItemListAPIView(generics.ListCreateAPIView):
     serializer_class = CartItemSerializer
