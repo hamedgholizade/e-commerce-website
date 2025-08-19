@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
+from accounts.utils import get_or_create_user
 from locations.serializers import AddressSerializer
 from accounts.utils import (
     custom_normalize_email,
@@ -108,7 +109,7 @@ class OTPLoginSerializer(serializers.Serializer):
 
         if custom_validate_phone(email_or_phone):
             attrs['mode'] = 'phone'
-            user = User.objects.filter(phone=email_or_phone).first()
+            user, _ = get_or_create_user(phone=email_or_phone, is_active=True)
         elif custom_validate_email(email_or_phone):
             attrs['mode'] = 'email'
             user = User.objects.filter(email=email_or_phone).first()
@@ -134,6 +135,7 @@ class UserViewProfileSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at'
         ]
+    
     
 class UserUpdateProfileSerializer(serializers.ModelSerializer):
     addresses = AddressSerializer(many=True, read_only=True)
