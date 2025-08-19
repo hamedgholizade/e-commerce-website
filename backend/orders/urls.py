@@ -5,6 +5,8 @@ from orders.views import (
     OrderDetailAPIView,
     SellerOrderListAPIView,
     SellerOrderDetailAPIView,
+    OrderItemListAPIView,
+    OrderItemDetailAPIView
 )
 
 app_name='orders'
@@ -14,6 +16,11 @@ urlpatterns = [
     path('order/<int:pk>/', OrderDetailAPIView.as_view(), name='order-detail'),
     path('seller/', SellerOrderListAPIView.as_view(), name='seller-order-list'),
     path('seller/<int:pk>/', SellerOrderDetailAPIView.as_view(), name='seller-order-detail'),
-    
+    path('order_item/<int:pk>/', OrderItemListAPIView.as_view(), name='order-item-list'),
+    path(
+        'order_item/<int:order_id>/<int:item_id>/',
+        OrderItemDetailAPIView.as_view(),
+        name='order-item-detail'
+    )
 ]
 

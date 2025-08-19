@@ -1,8 +1,16 @@
 from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from orders.models import Order
-from orders.serializers import OrderSerializer
+from orders.models import (
+    Order,
+    OrderItem
+)
+from orders.serializers import (
+    OrderSerializer,
+    OrderItemSerializer
+)
 from orders.tasks import send_order_status_email
 from orders.permissions import (
     IsOrderOwner,
@@ -62,4 +70,32 @@ class SellerOrderDetailAPIView(generics.RetrieveUpdateAPIView):
         instance = serializer.save()
         status_text = instance.get_status_display_text
         send_order_status_email.delay(status_text, instance.customer.email)
-        
+
+
+class OrderItemListAPIView(generics.GenericAPIView):
+    serializer_class = OrderItemSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    def get(self, request, pk):
+        items = OrderItem.objects.filter(
+            order=pk, order__customer=request.user, is_active=True
+        )
+        serializer= OrderItemSerializer(items, many=True)
+        return Response(serializer.data)
+
+
+class OrderItemDetailAPIView(generics.GenericAPIView):
+    serializer_class = OrderItemSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    def get(self, request, order_id, item_id):
+        item = OrderItem.objects.filter(
+            id=item_id,
+            order=order_id,
+            order__customer=request.user,
+            is_active=True
+        )
+        serializer = OrderItemSerializer(item)
+        return Response(serializer.data)
