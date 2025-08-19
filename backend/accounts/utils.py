@@ -1,9 +1,18 @@
+from django.contrib.auth import get_user_model
 from django.core.validators import validate_email as django_validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
 import phonenumbers
 from phonenumbers.phonenumberutil import NumberParseException
 
+User = get_user_model()
 
+
+def get_or_create_user(phone, **kwargs):
+    try:
+        return User.objects.get(phone=phone, **kwargs), False
+    except User.DoesNotExist:
+        return User.objects.create_user(phone=phone, **kwargs), True 
+    
 def custom_normalize_email(email: str) -> str | None:
     """
     Normalize the emil address with lower case domain to format (e.g., example@example.com).
