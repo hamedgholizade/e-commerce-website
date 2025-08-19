@@ -84,6 +84,29 @@ class CartApiTests(TestCase):
         self.assertEqual(res_cart.status_code, status.HTTP_200_OK)
         self.assertEqual(res_cart.data.get("total_price"), "450000")
         self.assertEqual(res_cart.data.get("total_discount"), "50000")
+        
+    def test_add_to_cart_by_url(self):
+        url = reverse('carts:add-to-cart', kwargs={'pk': self.item_cheapest.id})
+        res1 = self.client.post(url, format='json')
+        self.assertEqual(res1.status_code, status.HTTP_200_OK)
+        self.assertTrue(
+            CartItem.objects.filter(store_item=self.item_cheapest.id).exists()
+        )
+        
+        res2 = self.client.post(url, format='json')
+        self.assertEqual(res2.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            CartItem.objects.get(store_item=self.item_cheapest.id).quantity, 2
+        )
+        
+        res3 = self.client.post(url, {"quantity": 8}, format='json')
+        self.assertEqual(res3.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            CartItem.objects.get(store_item=self.item_cheapest.id).quantity, 10
+        )
+        
+        res4 = self.client.post(url, {"quantity": 50}, format='json')
+        self.assertEqual(res4.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_quantity_validation_min_and_stock(self):
         url = reverse('carts:cart-item-list')
