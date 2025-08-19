@@ -49,6 +49,26 @@ class AccountsTests(TestCase):
         }
         res = self.client.post(url, payload, format="json")
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+    
+    def test_register_with_login_otp(self):
+        cache.clear()
+        url = reverse('accounts:login-otp')
+        payload = {
+            "email_or_phone": "09120620003"
+        }
+        res = self.client.post(url, payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_202_ACCEPTED)
+        self.assertTrue(User.objects.filter(phone="9120620003", is_active=True).exists())
+        
+        cached_code = cache.get("otp-sent:phone:9120620003")
+        login_res = self.client.post(
+            url,
+            {"email_or_phone": "9120620003", "otp_code": str(cached_code)},
+            format="json",
+        )
+        self.assertEqual(login_res.status_code, status.HTTP_200_OK, login_res.content)
+        self.assertIn("access", login_res.data)
+        self.assertIn("refresh", login_res.data)
 
     # ---------- Login (password) ----------
     def test_login_with_phone_and_password(self):
