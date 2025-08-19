@@ -1,4 +1,5 @@
 from django.contrib.auth.models import UserManager as DjangoUserManager
+from django.contrib.auth.hashers import make_password
 
 from base.models import BaseModelQuerySet
 
@@ -10,13 +11,11 @@ class UserManager(DjangoUserManager.from_queryset(BaseModelQuerySet)):
     def create_user(self, phone, email=None, password=None, **extra_fields):
         if not phone:
             raise ValueError("Phone number is required")
-        if not password:
-            raise ValueError('Password is required')
         if email:
             email = self.normalize_email(email)
         extra_fields.setdefault('username', phone)
         user = self.model(phone=phone, email=email, **extra_fields)
-        user.set_password(password)
+        user.password = make_password(password)
         user.save()
         return user
 
