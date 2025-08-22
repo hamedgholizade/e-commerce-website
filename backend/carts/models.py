@@ -67,7 +67,18 @@ class CartItem(BaseModel):
             return Decimal(str(price))
         except (InvalidOperation, TypeError):
             return Decimal("0")
-        
+    
+    @property
+    def discount_price(self):
+        if hasattr(self.store_item, "discount_price"):
+            try:
+                price = Decimal(str(self.store_item.price))
+                disc_price = Decimal(str(self.store_item.discount_price))
+                if disc_price < price:
+                    return price - disc_price
+                return 0
+            except (InvalidOperation, TypeError):
+                    return 0
     
     @property
     def total_price(self):
