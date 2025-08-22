@@ -103,10 +103,10 @@ class ProductAPITest(TestCase):
         )
         self.client.force_authenticate(user=self.seller)
         url = reverse("products:product-detail", args=[product.id])
-        response = self.client.patch(url, {"stock": 15})
+        response = self.client.patch(url, {"description": "test-test"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         product.refresh_from_db()
-        self.assertEqual(product.stock, '15')
+        self.assertEqual(product.description, 'test-test')
 
     def test_update_product_by_user_denied(self):
         product = Product.objects.create(
@@ -114,7 +114,7 @@ class ProductAPITest(TestCase):
         )
         self.client.force_authenticate(user=self.user)
         url = reverse("products:product-detail", kwargs={'pk': product.id})
-        response = self.client.patch(url, {"stock": 20})
+        response = self.client.patch(url, {"description": "test-test"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_product_as_seller(self):

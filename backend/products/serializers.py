@@ -14,6 +14,11 @@ class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
         fields = '__all__'
+        read_only_fields = [
+            'is_active',
+            'created_at',
+            'updated_at'
+        ]
         
 
 class RecursiveCategorySerializer(serializers.Serializer):
@@ -36,7 +41,15 @@ class CategorySerializer(serializers.ModelSerializer):
             'description',
             'image',
             'parent',
-            'children'
+            'children',
+            'is_active',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = [
+            'is_active',
+            'created_at',
+            'updated_at'
         ]
     
     def create(self, validated_data):
@@ -46,6 +59,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    images = ProductImageSerializer(many=True, read_only=True)
     best_price = serializers.SerializerMethodField(read_only=True)
     best_seller = serializers.SerializerMethodField(read_only=True)
     
@@ -58,13 +72,19 @@ class ProductSerializer(serializers.ModelSerializer):
             'stock',
             'rating',
             'category',
+            'images',
             'best_price',
             'best_seller',
             'is_active',
             'created_at',
             'updated_at'
         ]
-        read_only_fields = ['is_active', 'created_at', 'updated_at']
+        read_only_fields = [
+            'stock',
+            'is_active',
+            'created_at',
+            'updated_at'
+        ]
 
     def get_best_price(self, obj):
         items = obj.store_items.active()
@@ -104,8 +124,39 @@ class ProductSerializer(serializers.ModelSerializer):
         return None
 
 
-class SellerProductSerializer(ProductSerializer):
+class SellerProductSerializer(serializers.ModelSerializer):
+    images = serializers.ListField(
+        child=serializers.ImageField(),
+        required=False,
+        allow_empty=True,
+        write_only=True
+    )
+    
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'name',
+            'description',
+            'category',
+            'images',
+            'is_active',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = [
+            'created_at',
+            'updated_at'
+        ]
     
     def create(self, validated_data):
         validated_data['is_active'] = False
-        return super().create(validated_data)
+        product =  super().create(validated_data)
+        images = validated_data.get('images', [])
+        if images:
+            for image in images:
+                ProductImage.objects.create(
+                    product=product, image=image
+                )
+        return product
+        

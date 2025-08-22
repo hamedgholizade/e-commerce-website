@@ -51,13 +51,6 @@ class CategoryModelViewSet(ModelViewSet):
     def perform_destroy(self, instance):
         instance.soft_delete()
 
-    @action(methods=['GET'], detail=True)
-    def parents(self, request, pk=None):
-        category = self.get_object()
-        parents = self._get_parents(category=category)
-        serializer = self.get_serializer(parents, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
     def _get_parents(self, category):
         result = []
         current = category.parent
@@ -65,15 +58,14 @@ class CategoryModelViewSet(ModelViewSet):
             result.insert(0, current)
             current = current.parent
         return result
-
-
-    @action(methods=['GET'], detail=True)
-    def children(self, request, pk=None):
-        category = self.get_object()
-        children = self._get_children(category=category)
-        serializer = self.get_serializer(children, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
     
+    @action(methods=['GET'], detail=True)
+    def parents(self, request, pk=None):
+        category = self.get_object()
+        parents = self._get_parents(category=category)
+        serializer = self.get_serializer(parents, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def _get_children(self, category):
         result = []
         def recurse(node):
@@ -82,3 +74,11 @@ class CategoryModelViewSet(ModelViewSet):
                 recurse(child)
         recurse(category)
         return result
+    
+    @action(methods=['GET'], detail=True)
+    def children(self, request, pk=None):
+        category = self.get_object()
+        children = self._get_children(category=category)
+        serializer = self.get_serializer(children, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
