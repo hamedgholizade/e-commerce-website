@@ -2,7 +2,7 @@ import baseApi from "@/api/base";
 import { AddressCreateData, AddressType } from "@/types";
 
 export async function createStoreAddress(data: AddressCreateData) {
-  const res = await baseApi.post<AddressType>(`/mystore/address/`, data);
+  const res = await baseApi.post<AddressType>(`/locations/address/`, data);
   return res.data;
 }
 
@@ -10,18 +10,18 @@ export async function updateStoreAddress(
   data: AddressCreateData & { id: string | number },
 ) {
   const res = await baseApi.put<AddressType>(
-    `/mystore/address/${data.id}/`,
+    `/locations/address/${data.id}/`,
     data,
   );
   return res.data;
 }
 
 export async function deleteStoreAddress(addressId: string | number) {
-  const res = await baseApi.delete(`/mystore/address/${addressId}/`);
+  const res = await baseApi.delete(`/locations/address/${addressId}/`);
   return res.data;
 }
 
 export async function getStoreAddress() {
-  const res = await baseApi.get<AddressType[]>(`/mystore/address/`);
+  const res = await baseApi.get<AddressType[]>(`/locations/address/`);
   return res.data;
 }

@@ -4,13 +4,13 @@ import baseApi from "../base";
 // API functions
 export async function getAllCategories(params?: Partial<CategoryQueryFilter>) {
   const res = await baseApi.get<ServerPaginatedResult<Category>>(
-    "/categories/",
+    "/products/category/",
     { params },
   );
   return res.data;
 }
 
 export async function getCategory(id: string) {
-  const res = await baseApi.get<Category>(`/categories/${id}/`);
+  const res = await baseApi.get<Category>(`/products/category/${id}/`);
   return res.data;
 }

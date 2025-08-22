@@ -8,7 +8,7 @@ export type Store = {
   seller: string;
 };
 export async function getStore(storeId: string | number) {
-  const res = await baseApi.get<Store>(`/stores/${storeId}/`);
+  const res = await baseApi.get<Store>(`/stores/store/${storeId}/`);
   return res.data;
 }
 
