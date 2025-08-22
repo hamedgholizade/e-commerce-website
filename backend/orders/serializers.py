@@ -21,6 +21,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'id',
             'order',
             'store_item',
+            'quantity',
             'price',
             'total_price',
             'is_active',
