@@ -56,7 +56,7 @@ class CartApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK, res.content)
         self.assertIn("total_price", res.data)
         self.assertIn("total_discount", res.data)
-        self.assertTrue(isinstance(res.data["total_price"], str))
+        self.assertTrue(isinstance(res.data["total_price"], int))
         self.assertTrue(isinstance(res.data["total_discount"], str))
 
     # ADD_ITEM
@@ -82,7 +82,7 @@ class CartApiTests(TestCase):
 
         res_cart = self.client.get(reverse('carts:cart-detail'))
         self.assertEqual(res_cart.status_code, status.HTTP_200_OK)
-        self.assertEqual(res_cart.data.get("total_price"), "450000")
+        self.assertEqual(res_cart.data.get("total_price"), 450000)
         self.assertEqual(res_cart.data.get("total_discount"), "50000")
         
     def test_add_to_cart_by_url(self):
@@ -146,7 +146,7 @@ class CartApiTests(TestCase):
         self.client.post(item_list_url, {"store_item": self.item_regular.id, "quantity": 1}, format="json")
         cart_res = self.client.get(cart_url)
         self.assertEqual(cart_res.status_code, status.HTTP_200_OK)
-        self.assertEqual(cart_res.data.get("total_price"), "120000")
+        self.assertEqual(cart_res.data.get("total_price"), 120000)
 
     def test_user_cannot_access_others_cart_items(self):
         self.client.force_authenticate(self.user)
