@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from products.models import ProductImage
+from locations.models import Address
 from stores.serializers import StoreItemSerializer
 from carts.models import (
     Cart,
@@ -8,18 +10,26 @@ from carts.models import (
 
 
 class CartItemSerializer(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField(read_only=True)
+    store = serializers.SerializerMethodField(read_only=True)
     store_item_data = StoreItemSerializer(read_only=True)
     unit_price = serializers.SerializerMethodField(read_only=True)
+    total_discount = serializers.SerializerMethodField(read_only=True)
+    total_item_price = serializers.SerializerMethodField(read_only=True)
     total_price = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = CartItem
         fields = [
             'id',
+            'product',
+            'quantity',
+            'store',
             'cart',
             'store_item',
-            'quantity',
             'unit_price',
+            'total_discount',
+            'total_item_price',
             'total_price',
             'store_item_data',
             'is_active',
@@ -33,11 +43,42 @@ class CartItemSerializer(serializers.ModelSerializer):
             'updated_at'
         ]
     
+    def get_product(self, obj):
+        product = obj.store_item.product
+        images = ProductImage.objects.filter(
+            product=product.id, is_active=True
+        )
+        return {
+            "id": product.id,
+            "name": product.name,
+            "description": product.description,
+            "images": [
+                {
+                    "id": image.id,
+                    "image": image.image
+                }
+                for image in images
+            ]
+        }
+    
+    def get_store(self, obj):
+        store = obj.store_item.store
+        store_address = Address.objects.filter(
+            store=store.id, is_active=True
+        ).first()
+        return store_address
+    
     def get_unit_price(self, obj):
-        return str(obj.unit_price)
+        return obj.unit_price
+    
+    def get_total_discount(self, obj):
+        return obj.discount_price
+    
+    def get_total_item_price(self, obj):
+        return obj.total_price
     
     def get_total_price(self, obj):
-        return str(obj.total_price)
+        return obj.cart.total_price
     
     def validate_quantity(self, value):
         if value < 1:
@@ -96,7 +137,7 @@ class CartSerializer(serializers.ModelSerializer):
         ]
         
     def get_total_price(self, obj):
-        return str(obj.total_price)
+        return obj.total_price
         
     def get_total_discount(self, obj):
         return str(obj.total_discount)

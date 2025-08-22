@@ -33,6 +33,7 @@ class CartDetailAPIView(generics.RetrieveDestroyAPIView):
     
     
 class AddToCartAPIView(generics.GenericAPIView):
+    queryset = Cart.objects.active()
     serializer_class = AddToCartSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
